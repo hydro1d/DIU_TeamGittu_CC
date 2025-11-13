@@ -1,0 +1,41 @@
+--
+-- Career Connect Database Setup
+--
+-- This script creates the database, the necessary tables, and a default user
+-- so you can immediately start and test the application.
+--
+
+-- 1. Create the database if it doesn't already exist.
+-- Using utf8mb4 for full Unicode support.
+CREATE DATABASE IF NOT EXISTS `career_connect_db` 
+CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- 2. Select the database to use for subsequent commands.
+USE `career_connect_db`;
+
+-- 3. Create the 'users' table.
+-- This table stores all user information, including authentication details and profile data.
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `fullName` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255) NOT NULL UNIQUE,
+  `password_hash` VARCHAR(255) NOT NULL,
+  `education` VARCHAR(255) DEFAULT '',
+  `experienceLevel` ENUM('Fresher', 'Junior', 'Mid-Level') DEFAULT 'Fresher',
+  `careerTrack` VARCHAR(255) DEFAULT '',
+  `skills` TEXT,
+  `projects` TEXT,
+  `careerInterests` TEXT,
+  `cvNotes` TEXT,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4. Insert a default user for testing.
+-- You can log in with:
+-- Email: alex@example.com
+-- Password: password123
+-- The password 'password123' is securely hashed using bcrypt.
+INSERT IGNORE INTO `users` 
+(`id`, `fullName`, `email`, `password_hash`, `education`, `experienceLevel`, `careerTrack`, `skills`, `projects`, `careerInterests`, `cvNotes`) 
+VALUES
+(1, 'Alex Doe', 'alex@example.com', '$2a$10$w2DR5X0fLeT7LMdzn2M6Duu.9xRbaEMk2p1d.O874o/403BFMb7vC', 'B.Sc. in Computer Science', 'Junior', 'Web Dev', 'React, JavaScript, HTML, CSS, Node.js', 'Built a portfolio website and a small e-commerce site using React and Node.js.', 'Seeking a challenging frontend or full-stack development role in a dynamic team.', 'A passionate developer eager to learn new technologies and contribute to impactful projects. Strong foundation in web fundamentals.');

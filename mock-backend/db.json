@@ -1,0 +1,40 @@
+
+{
+  "jobs": [
+    { "id": "job-1", "title": "Frontend Developer", "company": "Tech Solutions Inc.", "location": "Remote", "requiredSkills": ["JavaScript", "React", "HTML", "CSS", "TypeScript"], "experienceLevel": "Junior", "jobType": "Full-time", "description": "Join our team to build amazing user interfaces with React and TypeScript." },
+    { "id": "job-2", "title": "Backend Developer", "company": "Data Systems", "location": "New York, NY", "requiredSkills": ["Node.js", "Express", "MySQL", "REST APIs"], "experienceLevel": "Mid-Level", "jobType": "Full-time", "description": "Design and implement scalable backend services and APIs." },
+    { "id": "job-3", "title": "UI/UX Designer", "company": "Creative Minds", "location": "San Francisco, CA", "requiredSkills": ["Figma", "Sketch", "User Research", "Prototyping"], "experienceLevel": "Junior", "jobType": "Part-time", "description": "Create intuitive and visually appealing designs for our mobile and web applications." },
+    { "id": "job-4", "title": "Data Analyst Intern", "company": "Innovatech", "location": "Remote", "requiredSkills": ["SQL", "Python", "Pandas", "Data Visualization"], "experienceLevel": "Fresher", "jobType": "Internship", "description": "Analyze data to find insights and support business decisions." },
+    { "id": "job-5", "title": "Digital Marketing Specialist", "company": "MarketPro", "location": "Austin, TX", "requiredSkills": ["SEO", "SEM", "Google Analytics", "Content Marketing"], "experienceLevel": "Mid-Level", "jobType": "Full-time", "description": "Develop and execute digital marketing campaigns to drive growth." }
+  ],
+  "resources": [
+    { "id": "res-1", "title": "React - The Complete Guide", "platform": "Udemy", "url": "https://www.udemy.com/course/react-the-complete-guide-incl-redux/", "relatedSkills": ["React", "JavaScript", "HTML", "CSS"], "cost": "Paid" },
+    { "id": "res-2", "title": "FreeCodeCamp Responsive Web Design", "platform": "freeCodeCamp", "url": "https://www.freecodecamp.org/learn/responsive-web-design/", "relatedSkills": ["HTML", "CSS"], "cost": "Free" },
+    { "id": "res-3", "title": "The Complete Node.js Developer Course", "platform": "Udemy", "url": "https://www.udemy.com/course/the-complete-nodejs-developer-course-2/", "relatedSkills": ["Node.js", "Express", "MongoDB", "REST APIs"], "cost": "Paid" },
+    { "id": "res-4", "title": "Google Data Analytics Certificate", "platform": "Coursera", "url": "https://www.coursera.org/professional-certificates/google-data-analytics", "relatedSkills": ["SQL", "Data Analysis", "Python"], "cost": "Paid" },
+    { "id": "res-5", "title": "Figma UI UX Design Essentials", "platform": "Udemy", "url": "https://www.udemy.com/course/figma-ux-ui-design-user-experience-tutorial-course/", "relatedSkills": ["Figma", "UI/UX Design"], "cost": "Paid" }
+  ],
+  "users": [
+    {
+      "id": "user-1",
+      "fullName": "Alex Doe",
+      "email": "alex@example.com",
+      "password": "password123",
+      "education": "Computer Science",
+      "experienceLevel": "Junior",
+      "careerTrack": "Web Dev",
+      "skills": ["React", "JavaScript", "HTML", "CSS", "Node.js"],
+      "projects": "Built a portfolio website using React.",
+      "careerInterests": "Frontend development roles.",
+      "cvNotes": "Eager to learn and contribute to a fast-paced team."
+    }
+  ],
+  "recommendations": {
+    "jobs": [
+      { "item": { "id": "job-1", "title": "Frontend Developer", "company": "Tech Solutions Inc." }, "matchingSkills": ["React", "JavaScript", "HTML"] }
+    ],
+    "resources": [
+      { "item": { "id": "res-1", "title": "React - The Complete Guide", "platform": "Udemy" }, "matchingSkills": ["React", "JavaScript"] }
+    ]
+  }
+}

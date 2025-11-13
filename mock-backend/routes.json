@@ -1,0 +1,12 @@
+
+{
+  "/api/auth/login": "/users",
+  "/api/auth/register": "/users",
+  "/api/auth/me": "/users/1",
+  "/api/users/:id": "/users/:id",
+  "/api/jobs": "/jobs",
+  "/api/jobs/:id": "/jobs/:id",
+  "/api/resources": "/resources",
+  "/api/recommendations/jobs": "/recommendations/jobs",
+  "/api/recommendations/resources": "/recommendations/resources"
+}

@@ -140,8 +140,9 @@ The AI-powered **Career Roadmap** feature uses the Google Gemini API. To enable 
 
 ### 1️⃣ Get Your API Key
 
-1.  Go to **Google AI Studio**: ➡️ [makersuite.google.com](https://makersuite.google.com/)
-2.  Click **"Get API key"** and create a new key.
+1.  Go to **Google AI Studio**: ➡️ [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
+2.  Log in with your Google account.
+3.  Click **"Create API key"** to generate a new API key.
 
 ### 2️⃣ Create a `.env` File for the Frontend
 
@@ -150,11 +151,11 @@ The AI-powered **Career Roadmap** feature uses the Google Gemini API. To enable 
 
 ### 3️⃣ Add Your API Key
 
-*   Open the new `.env` file and add the following line, replacing `your_google_api_key_here` with the key you just created.
+*   Open the new `.env` file and add the following line, replacing `your_gemini_api_key_here` with the key you just created.
 
 ```env
 # Google Gemini API Key
-API_KEY="your_google_api_key_here"
+API_KEY="your_gemini_api_key_here"
 ```
 
 ✅ After saving, the frontend will be able to connect to the Gemini API. You may need to restart the development server if it's already running.

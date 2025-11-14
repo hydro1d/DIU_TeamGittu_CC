@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
+import CareerBot from './CareerBot';
 
 const Layout: React.FC = () => {
   return (
@@ -13,6 +13,7 @@ const Layout: React.FC = () => {
       <footer className="text-center py-4 text-gray-500 text-sm">
         <p>&copy; 2024 Career Connect. All rights reserved.</p>
       </footer>
+      <CareerBot />
     </div>
   );
 };

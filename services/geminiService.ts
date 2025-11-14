@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { User, Resource } from '../types';
 
@@ -10,41 +11,47 @@ if (apiKey) {
   console.warn("Gemini AI API key not found. The AI roadmap feature will be disabled. Please create a .env file in the project root and add API_KEY='your_key'.");
 }
 
-export const generateCareerRoadmap = async (user: User, resources: Resource[]): Promise<string> => {
+export const generateCareerRoadmap = async (user: User, resources: Resource[], targetRole: string, timeframe: string): Promise<string> => {
   if (!ai) {
     throw new Error("AI feature not configured. Please ensure a Google Gemini API key is provided in the root .env file and that you have restarted the server.");
   }
   
   const userProfileSummary = `
-- Career Track: ${user.careerTrack}
+- Current Career Track: ${user.careerTrack}
 - Experience Level: ${user.experienceLevel}
 - Current Skills: ${user.skills.join(', ')}
-- Stated Career Interests: ${user.careerInterests}
   `;
 
   const availableResources = resources.map(r => `- "${r.title}" from ${r.platform}. It covers skills like: ${r.relatedSkills.join(', ')}.`).join('\n');
 
   const prompt = `
-You are a world-class career coach and mentor. A user with the following profile is looking for a personalized career roadmap to achieve their goals:
+You are a world-class career coach and mentor specializing in creating hyper-optimized, accelerated learning paths.
+
+A user wants to achieve the **Target Role** of **"${targetRole}"** within a **Timeframe** of **"${timeframe}"**.
+
+Here is the user's current profile:
 ---
-**USER PROFILE:**
+**USER'S CURRENT PROFILE:**
 ${userProfileSummary}
 ---
-They have been recommended the following learning resources to get started:
+
+Here are some learning resources available to them:
 ---
-**RECOMMENDED RESOURCES:**
+**AVAILABLE RESOURCES:**
 ${availableResources}
 ---
-Based on their profile and the available resources, create a clear, actionable, and encouraging step-by-step career roadmap.
+
+Your task is to generate the **shortest and most optimized career roadmap** possible for this user to achieve their target role within the specified timeframe.
 
 The roadmap MUST:
-1.  Be structured into logical phases or steps (e.g., "Phase 1: Strengthen Your Foundation", "Phase 2: Advanced Topics & Specialization", "Phase 3: Build & Showcase Your Portfolio").
-2.  Within each phase, provide specific, actionable tasks.
-3.  **Crucially, you must recommend specific resources from the provided list** for relevant tasks. For example, "To master the fundamentals of React, complete the *'React - The Complete Guide'* course on Udemy."
-4.  Include a step about practical application, like building projects. Suggest 1-2 specific project ideas that are relevant to their career track and can be built using their new skills.
-5.  Conclude with a short, motivational summary to inspire them.
+1.  Be extremely focused. Prioritize only the absolute most critical skills needed to get a job as a ${targetRole}.
+2.  Be structured into a clear, time-based plan (e.g., Month 1, Months 2-3) that respects the total timeframe of ${timeframe}.
+3.  Identify the key skill gaps between the user's current skills and what's required for a ${targetRole}.
+4.  For each step, recommend the most relevant resources from the provided list. Be direct, like "Complete the 'React - The Complete Guide' course to learn React."
+5.  Include one or two highly impactful portfolio projects that directly demonstrate the required skills for the target role.
+6.  Conclude with a brief, motivational summary emphasizing the focused nature of this accelerated plan.
 
-Format the entire output in simple Markdown. Use headings for phases and bullet points for action items. Do not use complex markdown syntax like tables. Ensure the tone is professional, encouraging, and highly personalized.
+Format the entire output in simple Markdown. Use headings for time-based phases and bullet points for action items. Be concise and actionable.
   `;
 
   try {
@@ -116,4 +123,46 @@ export const extractSkillsFromCV = async (cvText: string): Promise<string[]> => 
         }
         throw new Error("Failed to analyze CV. There might be an issue with the AI service or the provided text format.");
     }
+};
+
+export const getCareerBotAnswer = async (question: string, user: User): Promise<string> => {
+  if (!ai) {
+    throw new Error("AI feature not configured. Please ensure a Google Gemini API key is provided in the root .env file.");
+  }
+
+  const userProfileSummary = `
+- Career Track: ${user.careerTrack}
+- Experience Level: ${user.experienceLevel}
+- Current Skills: ${user.skills.join(', ')}
+- Stated Career Interests: ${user.careerInterests}
+  `;
+
+  const prompt = `
+You are CareerBot, a friendly and helpful AI career advisor.
+A user with the following profile is asking you a question.
+---
+**USER PROFILE:**
+${userProfileSummary}
+---
+**USER QUESTION:**
+"${question}"
+---
+Please provide a concise, helpful, and encouraging answer to the user's question based on their profile.
+Keep your response to a few sentences, maximum 2-3 short paragraphs.
+Format your answer in simple markdown.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+    });
+    return response.text;
+  } catch (error) {
+    console.error("Error getting career bot answer:", error);
+    if (error instanceof Error && error.message.includes('API key not valid')) {
+      throw new Error("The provided Google Gemini API key is invalid. Please check your .env file.");
+    }
+    throw new Error("I'm having trouble connecting to my brain right now. Please try again in a moment.");
+  }
 };

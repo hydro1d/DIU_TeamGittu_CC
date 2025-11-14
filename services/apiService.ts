@@ -47,3 +47,12 @@ export const getRecommendedResources = async (): Promise<Match<Resource>[]> => {
     const response = await fetch(`${API_BASE_URL}/recommendations/resources`, { headers: getAuthHeaders() });
     return handleResponse<Match<Resource>[]>(response);
 };
+
+export const getRecommendedResourcesForSkills = async (skills: string[]): Promise<Resource[]> => {
+    const response = await fetch(`${API_BASE_URL}/recommendations/resources-for-skills`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ skills }),
+    });
+    return handleResponse<Resource[]>(response);
+};

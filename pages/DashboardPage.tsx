@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,6 +13,24 @@ import { generateCareerRoadmap } from '../services/geminiService';
 const RecommendationCard: React.FC<{ match: Match<Job | Resource> }> = ({ match }) => {
     const isJob = 'company' in match.item;
     const linkTo = isJob ? `/jobs/${match.item.id}` : (match.item as Resource).url;
+    
+    const scoreColorClass =
+        typeof match.matchingScore === 'number'
+            ? match.matchingScore >= 70
+                ? 'text-green-500'
+                : match.matchingScore >= 40
+                ? 'text-yellow-500'
+                : 'text-red-500'
+            : 'text-gray-500';
+
+    const progressColorClass =
+        typeof match.matchingScore === 'number'
+            ? match.matchingScore >= 70
+                ? 'bg-green-500'
+                : match.matchingScore >= 40
+                ? 'bg-yellow-500'
+                : 'bg-red-500'
+            : 'bg-gray-500';
 
     const content = (
         <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
@@ -21,6 +40,17 @@ const RecommendationCard: React.FC<{ match: Match<Job | Resource> }> = ({ match 
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                 {isJob ? (match.item as Job).company : (match.item as Resource).platform}
             </p>
+            {isJob && typeof match.matchingScore === 'number' && (
+                <div className="my-2">
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">Match Score</span>
+                        <span className={`font-bold ${scoreColorClass}`}>{match.matchingScore}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 mt-1">
+                        <div className={`${progressColorClass} h-1.5 rounded-full`} style={{ width: `${match.matchingScore}%` }}></div>
+                    </div>
+                </div>
+            )}
             <div className="mt-auto pt-2">
                 <p className="text-xs font-semibold text-green-600 dark:text-green-400">Top match for you:</p>
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -47,6 +77,14 @@ const DashboardPage: React.FC = () => {
   const [isGeneratingRoadmap, setIsGeneratingRoadmap] = useState(false);
   const [roadmapError, setRoadmapError] = useState<string | null>(null);
   const roadmapRef = useRef<HTMLDivElement>(null);
+  const [targetRole, setTargetRole] = useState<string>('');
+  const [timeframe, setTimeframe] = useState<string>('3 months');
+
+  useEffect(() => {
+    if (user) {
+        setTargetRole(user.careerTrack);
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -73,13 +111,17 @@ const DashboardPage: React.FC = () => {
         setRoadmapError("We need your profile and some recommended resources to generate a roadmap.");
         return;
     };
+    if (!targetRole.trim()) {
+        setRoadmapError("Please enter a target role to generate your roadmap.");
+        return;
+    }
     setIsGeneratingRoadmap(true);
     setRoadmapError(null);
     setRoadmap(null);
 
     try {
         const fullResources = recommendedResources.map(match => match.item as Resource);
-        const generatedRoadmap = await generateCareerRoadmap(user, fullResources);
+        const generatedRoadmap = await generateCareerRoadmap(user, fullResources, targetRole, timeframe);
         setRoadmap(generatedRoadmap);
     } catch (error) {
         if (error instanceof Error) {
@@ -206,8 +248,37 @@ const DashboardPage: React.FC = () => {
 
             {!roadmap && !isGeneratingRoadmap && !roadmapError && (
                 <div className="text-center p-8">
-                    <p className="mb-4 text-gray-600 dark:text-gray-300">Get a step-by-step plan to achieve your career goals, tailored just for you.</p>
-                    <button onClick={handleGenerateRoadmap} className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors font-semibold">
+                    <p className="mb-6 text-gray-600 dark:text-gray-300">Get a step-by-step plan to achieve your career goals, tailored just for you.</p>
+                    <div className="max-w-xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-left">
+                        <div>
+                            <label htmlFor="targetRole" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Your Target Role</label>
+                            <input
+                                id="targetRole"
+                                type="text"
+                                value={targetRole}
+                                onChange={(e) => setTargetRole(e.target.value)}
+                                placeholder="e.g., Frontend Developer"
+                                className="mt-1 block w-full p-2 border rounded-md shadow-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="timeframe" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Desired Timeframe</label>
+                            <select
+                                id="timeframe"
+                                value={timeframe}
+                                onChange={(e) => setTimeframe(e.target.value)}
+                                className="mt-1 block w-full p-2 border rounded-md shadow-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="3 months">3 Months</option>
+                                <option value="6 months">6 Months</option>
+                                <option value="1 year">1 Year</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={handleGenerateRoadmap}
+                        disabled={!targetRole.trim() || isGeneratingRoadmap}
+                        className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed">
                         Generate My Roadmap
                     </button>
                 </div>

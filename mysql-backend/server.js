@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2/promise');
@@ -220,12 +219,29 @@ const getRecommendations = (user, allItems, skillField) => {
 
     const recommendations = [];
     allItems.forEach(item => {
-        const matchingSkills = item[skillField].filter(skill => userSkills.has(skill.toLowerCase()));
+        const requiredSkills = item[skillField] || [];
+        const matchingSkills = requiredSkills.filter(skill => userSkills.has(skill.toLowerCase()));
+        
         if (matchingSkills.length > 0) {
-            recommendations.push({ item, reason: `Matches skills: ${matchingSkills.join(', ')}`, matchingSkills });
+            const matchingScore = requiredSkills.length > 0 
+                ? Math.round((matchingSkills.length / requiredSkills.length) * 100) 
+                : 0;
+            
+            recommendations.push({ 
+                item, 
+                reason: `Matches skills: ${matchingSkills.join(', ')}`, 
+                matchingSkills,
+                matchingScore 
+            });
         }
     });
-    recommendations.sort((a, b) => b.matchingSkills.length - a.matchingSkills.length);
+
+    recommendations.sort((a, b) => {
+        if (b.matchingScore !== a.matchingScore) {
+            return b.matchingScore - a.matchingScore;
+        }
+        return b.matchingSkills.length - a.matchingSkills.length;
+    });
     return recommendations;
 };
 
@@ -288,6 +304,27 @@ app.get('/recommendations/resources', authenticateToken, async (req, res) => {
         console.error('Resource recommendation error:', error);
         res.status(500).json({ message: 'Server error' });
     }
+});
+
+app.post('/recommendations/resources-for-skills', authenticateToken, (req, res) => {
+    const { skills } = req.body;
+    if (!Array.isArray(skills)) {
+        return res.status(400).json({ message: 'Skills array is required.' });
+    }
+    if (skills.length === 0) {
+        return res.json([]);
+    }
+
+    const skillsToFind = new Set(skills.map(s => s.toLowerCase()));
+    
+    const recommendedResources = RESOURCES.filter(resource => 
+        resource.relatedSkills.some(skill => skillsToFind.has(skill.toLowerCase()))
+    );
+
+    const uniqueResources = Array.from(new Map(recommendedResources.map(res => [res.id, res])).values());
+
+    // Return up to 3 for a clean UI
+    res.json(uniqueResources.slice(0, 3));
 });
 
 

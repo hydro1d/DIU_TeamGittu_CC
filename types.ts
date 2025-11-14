@@ -49,4 +49,5 @@ export interface Match<T> {
   item: T;
   reason: string;
   matchingSkills: string[];
+  matchingScore?: number;
 }

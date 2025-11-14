@@ -26,14 +26,14 @@ const JobCard: React.FC<{ job: Job; userSkills: Set<string> }> = ({ job, userSki
             : 'bg-red-500';
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 flex flex-col h-full hover:-translate-y-1">
             <div className="flex-grow">
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start gap-4">
                     <div>
-                        <h3 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{job.title}</h3>
+                        <h3 className="text-xl font-bold text-orange-500 dark:text-orange-400">{job.title}</h3>
                         <p className="text-gray-700 dark:text-gray-300">{job.company}</p>
                     </div>
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${job.jobType === JobType.FullTime ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+                    <span className="flex-shrink-0 px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">
                         {job.jobType}
                     </span>
                 </div>
@@ -42,7 +42,7 @@ const JobCard: React.FC<{ job: Job; userSkills: Set<string> }> = ({ job, userSki
                     <Briefcase className="w-4 h-4 ml-2" /> <span>{job.experienceLevel}</span>
                 </div>
                 <div className="mt-4">
-                    <h4 className="font-semibold text-sm">Required Skills:</h4>
+                    <h4 className="font-semibold text-sm text-gray-800 dark:text-gray-200">Required Skills:</h4>
                     <div className="flex flex-wrap gap-2 mt-2">
                         {job.requiredSkills.map(skill => (
                             <span key={skill} className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs font-medium px-2.5 py-0.5 rounded-full">{skill}</span>
@@ -61,7 +61,7 @@ const JobCard: React.FC<{ job: Job; userSkills: Set<string> }> = ({ job, userSki
                 </div>
             </div>
             <div className="mt-6 text-right">
-                <Link to={`/jobs/${job.id}`} className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                <Link to={`/jobs/${job.id}`} className="font-semibold text-orange-500 dark:text-orange-400 hover:underline">
                     View Details &rarr;
                 </Link>
             </div>
@@ -109,16 +109,16 @@ const JobsPage: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-4xl font-bold">Find Your Next Opportunity</h1>
+            <h1 className="text-4xl font-bold opacity-0 animate-fadeInUp">Find Your Next Opportunity</h1>
             
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md grid grid-cols-1 md:grid-cols-3 gap-4 opacity-0 animate-fadeInUp animation-delay-200">
                 <input
                     type="text"
                     name="role"
                     placeholder="Filter by role (e.g., Developer)"
                     value={filters.role}
                     onChange={handleFilterChange}
-                    className="p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600"
+                    className="p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-orange-500 focus:border-orange-500"
                 />
                 <input
                     type="text"
@@ -126,13 +126,13 @@ const JobsPage: React.FC = () => {
                     placeholder="Filter by location (e.g., Remote)"
                     value={filters.location}
                     onChange={handleFilterChange}
-                    className="p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600"
+                    className="p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-orange-500 focus:border-orange-500"
                 />
                 <select
                     name="type"
                     value={filters.type}
                     onChange={handleFilterChange}
-                    className="p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600"
+                    className="p-2 border rounded-md bg-gray-50 dark:bg-gray-700 dark:border-gray-600 focus:ring-orange-500 focus:border-orange-500"
                 >
                     <option value="">All Types</option>
                     {Object.values(JobType).map(type => <option key={type} value={type}>{type}</option>)}
@@ -141,9 +141,13 @@ const JobsPage: React.FC = () => {
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredJobs.length > 0 ? (
-                    filteredJobs.map(job => <JobCard key={job.id} job={job} userSkills={userSkills} />)
+                    filteredJobs.map((job, index) => (
+                        <div key={job.id} className="opacity-0 animate-fadeInUp" style={{ animationDelay: `${200 + index * 100}ms` }}>
+                             <JobCard job={job} userSkills={userSkills} />
+                        </div>
+                    ))
                 ) : (
-                    <p className="md:col-span-2 lg:col-span-3 text-center text-gray-500">No jobs match your criteria.</p>
+                    <p className="md:col-span-2 lg:col-span-3 text-center text-gray-500 opacity-0 animate-fadeInUp">No jobs match your criteria.</p>
                 )}
             </div>
         </div>

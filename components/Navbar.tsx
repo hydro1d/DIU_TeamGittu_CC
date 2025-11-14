@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Briefcase, BookOpen, UserCircle, LogOut, Menu, X } from './icons';
 
@@ -26,9 +26,9 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <div className="flex-shrink-0 text-xl font-bold text-indigo-600 dark:text-indigo-400">
+            <Link to="/" className="flex-shrink-0 text-xl font-bold text-orange-500 dark:text-orange-400">
               Career Connect
-            </div>
+            </Link>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
                 {navLinks.map((link) => (
@@ -38,7 +38,7 @@ const Navbar: React.FC = () => {
                     className={({ isActive }) =>
                       `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                         isActive
-                          ? 'bg-indigo-600 text-white'
+                          ? 'bg-orange-500 text-white'
                           : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                       }`
                     }
@@ -52,10 +52,13 @@ const Navbar: React.FC = () => {
           </div>
           <div className="hidden md:block">
             <div className="ml-4 flex items-center md:ml-6">
-              <span className="text-gray-800 dark:text-gray-200 mr-4">Hi, {user?.fullName.split(' ')[0]}!</span>
+              <div className="flex items-center gap-2 mr-4">
+                  <UserCircle className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                  <span className="text-gray-800 dark:text-gray-200">Hi, {user?.fullName.split(' ')[0]}!</span>
+              </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 <LogOut className="w-5 h-5" />
                 Logout
@@ -84,7 +87,7 @@ const Navbar: React.FC = () => {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2 rounded-md text-base font-medium transition-colors ${
                     isActive
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-orange-500 text-white'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`
                 }
@@ -95,7 +98,7 @@ const Navbar: React.FC = () => {
             ))}
              <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 text-left bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md text-base font-medium transition-colors mt-2"
+                className="w-full flex items-center gap-3 text-left bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded-md text-base font-medium transition-colors mt-2"
               >
                 <LogOut className="w-5 h-5" />
                 Logout

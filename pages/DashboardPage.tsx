@@ -1,10 +1,10 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getRecommendedJobs, getRecommendedResources } from '../services/apiService';
 import { Job, Resource, Match } from '../types';
-import { Briefcase, BookOpen, Rocket, Download } from '../components/icons';
+import { Briefcase, BookOpen, Rocket, Download, CheckCircle } from '../components/icons';
 import { marked } from 'marked';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -33,8 +33,8 @@ const RecommendationCard: React.FC<{ match: Match<Job | Resource> }> = ({ match 
             : 'bg-gray-500';
 
     const content = (
-        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-            <h4 className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
+        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+            <h4 className="text-lg font-bold text-orange-500 dark:text-orange-400">
                 {isJob ? (match.item as Job).title : match.item.title}
             </h4>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
@@ -84,6 +84,21 @@ const DashboardPage: React.FC = () => {
     if (user) {
         setTargetRole(user.careerTrack);
     }
+  }, [user]);
+
+  const profileCompletion = useMemo(() => {
+    if (!user) return { score: 0, percentage: 0 };
+    let score = 0;
+    const totalChecks = 6;
+
+    if (user.education?.trim()) score++;
+    if (user.careerTrack?.trim()) score++;
+    if (user.skills?.length >= 3) score++;
+    if (user.projects?.trim()) score++;
+    if (user.careerInterests?.trim()) score++;
+    if (user.cvNotes?.trim()) score++;
+    
+    return { score, percentage: Math.round((score / totalChecks) * 100) };
   }, [user]);
 
   useEffect(() => {
@@ -174,35 +189,82 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md opacity-0 animate-fadeInUp">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back, {user.fullName}!</h1>
         <p className="mt-2 text-gray-600 dark:text-gray-300">Here's a summary of your profile and top recommendations.</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <div className="md:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md opacity-0 animate-fadeInUp animation-delay-200">
             <h2 className="text-xl font-semibold mb-4">Profile Summary</h2>
-            <div className="space-y-3 text-sm">
-                <p><strong>Career Track:</strong> {user.careerTrack}</p>
-                <p><strong>Experience:</strong> {user.experienceLevel}</p>
-                <p><strong>Top Skills:</strong></p>
-                <div className="flex flex-wrap gap-2">
-                    {user.skills.slice(0,5).map(skill => (
-                        <span key={skill} className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-indigo-900 dark:text-indigo-300">{skill}</span>
-                    ))}
-                    {user.skills.length > 5 && <span className="text-xs text-gray-500">...and more</span>}
+             <div className="space-y-4 text-sm">
+                <div>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400">Education</p>
+                    <p className="text-gray-800 dark:text-gray-200">{user.education || <span className="italic text-gray-500">Not specified</span>}</p>
+                </div>
+                <div>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400">Career Track</p>
+                    <p className="text-gray-800 dark:text-gray-200">{user.careerTrack || <span className="italic text-gray-500">Not specified</span>}</p>
+                </div>
+                <div>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400">Experience</p>
+                    <p className="text-gray-800 dark:text-gray-200">{user.experienceLevel}</p>
+                </div>
+                <div>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400">Interests</p>
+                    <p className="text-gray-800 dark:text-gray-200">{user.careerInterests || <span className="italic text-gray-500">Not specified</span>}</p>
+                </div>
+                <div>
+                    <p className="font-semibold text-gray-500 dark:text-gray-400 mb-2">Top Skills</p>
+                    <div className="flex flex-wrap gap-2">
+                        {user.skills.length > 0 ? (
+                            <>
+                                {user.skills.slice(0,5).map(skill => (
+                                    <span key={skill} className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-orange-900 dark:text-orange-300">{skill}</span>
+                                ))}
+                                {user.skills.length > 5 && <span className="text-xs text-gray-500 self-center">...and more</span>}
+                            </>
+                        ) : (
+                            <p className="italic text-gray-500 text-xs">No skills added yet.</p>
+                        )}
+                    </div>
                 </div>
             </div>
-            <Link to="/profile" className="mt-6 inline-block w-full text-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
-                Edit Profile
+            
+            <div className="mt-6 border-t pt-4 dark:border-gray-700">
+                <div className="flex justify-between items-center text-sm mb-1">
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">Profile Completion</span>
+                    <span className="font-bold text-orange-500">{profileCompletion.percentage}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div 
+                        className="bg-orange-500 h-2 rounded-full transition-all duration-500" 
+                        style={{ width: `${profileCompletion.percentage}%` }}
+                    ></div>
+                </div>
+                {profileCompletion.percentage < 100 && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        Complete your profile to get better recommendations!
+                    </p>
+                )}
+                {profileCompletion.percentage === 100 && (
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-2 flex items-center gap-1">
+                        <CheckCircle className="w-4 h-4" />
+                        Your profile is complete!
+                    </p>
+                )}
+            </div>
+
+            <Link to="/profile" className="mt-6 inline-block w-full text-center bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors">
+                {profileCompletion.percentage < 100 ? 'Complete Profile' : 'Edit Profile'}
             </Link>
         </div>
 
         <div className="md:col-span-2 space-y-6">
-            <section>
+            <section className="opacity-0 animate-fadeInUp animation-delay-400">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-semibold flex items-center gap-2"><Briefcase /> Recommended Jobs</h2>
-                    <Link to="/jobs" className="text-indigo-600 dark:text-indigo-400 hover:underline">View All</Link>
+                    <Link to="/jobs" className="text-orange-500 dark:text-orange-400 hover:underline">View All</Link>
                 </div>
                 {recommendedJobs.length > 0 ? (
                      <div className="grid sm:grid-cols-1 gap-4">
@@ -211,10 +273,10 @@ const DashboardPage: React.FC = () => {
                 ) : <p>No job recommendations found based on your profile.</p>}
             </section>
 
-            <section>
+            <section className="opacity-0 animate-fadeInUp animation-delay-600">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-semibold flex items-center gap-2"><BookOpen /> Recommended Resources</h2>
-                    <Link to="/resources" className="text-indigo-600 dark:text-indigo-400 hover:underline">View All</Link>
+                    <Link to="/resources" className="text-orange-500 dark:text-orange-400 hover:underline">View All</Link>
                 </div>
                  {recommendedResources.length > 0 ? (
                      <div className="grid sm:grid-cols-1 gap-4">
@@ -225,14 +287,14 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8 opacity-0 animate-fadeInUp animation-delay-800">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
                 <h2 className="text-2xl font-semibold flex items-center gap-2">
-                    <Rocket className="w-6 h-6 text-indigo-500" /> Your AI-Powered Career Roadmap
+                    <Rocket className="w-6 h-6 text-orange-500" /> Your AI-Powered Career Roadmap
                 </h2>
                 {roadmap && !isGeneratingRoadmap && (
-                    <button onClick={handleDownloadPdf} className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                    <button onClick={handleDownloadPdf} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
                        <Download className="w-4 h-4" /> Download PDF
                     </button>
                 )}
@@ -240,7 +302,7 @@ const DashboardPage: React.FC = () => {
 
             {isGeneratingRoadmap && (
                 <div className="text-center p-8">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
                     <p className="mt-4 text-gray-600 dark:text-gray-300">Crafting your personal career path with AI...</p>
                 </div>
             )}
@@ -258,7 +320,7 @@ const DashboardPage: React.FC = () => {
                                 value={targetRole}
                                 onChange={(e) => setTargetRole(e.target.value)}
                                 placeholder="e.g., Frontend Developer"
-                                className="mt-1 block w-full p-2 border rounded-md shadow-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="mt-1 block w-full p-2 border rounded-md shadow-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-600 focus:ring-orange-500 focus:border-orange-500"
                             />
                         </div>
                         <div>
@@ -267,7 +329,7 @@ const DashboardPage: React.FC = () => {
                                 id="timeframe"
                                 value={timeframe}
                                 onChange={(e) => setTimeframe(e.target.value)}
-                                className="mt-1 block w-full p-2 border rounded-md shadow-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="mt-1 block w-full p-2 border rounded-md shadow-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-600 focus:ring-orange-500 focus:border-orange-500"
                             >
                                 <option value="3 months">3 Months</option>
                                 <option value="6 months">6 Months</option>
@@ -278,14 +340,14 @@ const DashboardPage: React.FC = () => {
                     <button 
                         onClick={handleGenerateRoadmap}
                         disabled={!targetRole.trim() || isGeneratingRoadmap}
-                        className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        className="bg-orange-500 text-white px-6 py-3 rounded-md hover:bg-orange-600 transition-colors font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed animate-pulse-glow">
                         Generate My Roadmap
                     </button>
                 </div>
             )}
             
             {roadmap && (
-                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-md">
+                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-md opacity-0 animate-fadeInUp">
                     <div ref={roadmapRef} className="prose dark:prose-invert max-w-none p-4" dangerouslySetInnerHTML={{ __html: marked.parse(roadmap) as string }}>
                     </div>
                  </div>

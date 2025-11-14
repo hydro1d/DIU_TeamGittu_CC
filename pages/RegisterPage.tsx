@@ -57,7 +57,14 @@ const RegisterPage: React.FC = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
+        <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 py-12 px-4">
+            <header className="absolute top-0 left-0 w-full p-4 sm:p-6 lg:p-8">
+                <div className="container mx-auto">
+                    <Link to="/" className="text-2xl font-bold text-orange-500 hover:opacity-80 transition-opacity">
+                        Career Connect
+                    </Link>
+                </div>
+            </header>
             <div className="w-full max-w-lg p-8 space-y-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create Your Account</h1>
@@ -82,14 +89,14 @@ const RegisterPage: React.FC = () => {
                         </select>
                     </div>
                     <div>
-                        <button type="submit" className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button type="submit" className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
                             Sign up
                         </button>
                     </div>
                 </form>
                 <p className="text-center text-sm text-gray-600 dark:text-gray-400">
                     Already have an account?{' '}
-                    <Link to="/login" className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+                    <Link to="/login" className="font-medium text-orange-500 dark:text-orange-400 hover:underline">
                         Log in
                     </Link>
                 </p>

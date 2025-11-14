@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getJobById, getRecommendedResourcesForSkills } from '../services/apiService';
@@ -81,7 +82,7 @@ const JobDetailPage: React.FC = () => {
             : 'bg-red-500';
 
     if (loading) return <div className="text-center p-8">Loading job details...</div>;
-    if (!job) return <div className="text-center p-8">Job not found. <Link to="/jobs" className="text-indigo-600">Go back to jobs list.</Link></div>;
+    if (!job) return <div className="text-center p-8">Job not found. <Link to="/jobs" className="text-orange-500">Go back to jobs list.</Link></div>;
 
     return (
         <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-4xl mx-auto">
@@ -90,7 +91,7 @@ const JobDetailPage: React.FC = () => {
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{job.title}</h1>
                     <p className="text-xl text-gray-700 dark:text-gray-300">{job.company}</p>
                 </div>
-                <span className={`px-4 py-2 text-sm font-semibold rounded-full ${job.jobType === 'Full-time' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'}`}>
+                <span className="px-4 py-2 text-sm font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">
                     {job.jobType}
                 </span>
             </div>
@@ -131,7 +132,7 @@ const JobDetailPage: React.FC = () => {
                     <div className="text-center">
                         <button 
                             disabled={!canApply}
-                            className="w-full px-6 py-3 font-bold text-white bg-indigo-600 rounded-lg shadow-md hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed dark:disabled:bg-gray-600"
+                            className="w-full px-6 py-3 font-bold text-white bg-orange-500 rounded-lg shadow-md hover:bg-orange-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed dark:disabled:bg-gray-600"
                             onClick={() => alert('Application feature is a work in progress!')}
                             aria-label={canApply ? 'Apply for this job' : `Match score is below 70%, application disabled`}
                         >
@@ -159,8 +160,8 @@ const JobDetailPage: React.FC = () => {
                                             <ul className="space-y-2 mt-2">
                                                 {recommendedCourses.map(course => (
                                                     <li key={course.id}>
-                                                        <a href={course.url} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-2 group">
-                                                            <BookOpen className="w-4 h-4 text-gray-500 group-hover:text-indigo-500 transition-colors" />
+                                                        <a href={course.url} target="_blank" rel="noopener noreferrer" className="text-sm text-orange-500 dark:text-orange-400 hover:underline flex items-center gap-2 group">
+                                                            <BookOpen className="w-4 h-4 text-gray-500 group-hover:text-orange-500 transition-colors" />
                                                             <span>{course.title} ({course.platform})</span>
                                                         </a>
                                                     </li>
@@ -177,7 +178,7 @@ const JobDetailPage: React.FC = () => {
                 </div>
             </div>
             <div className="mt-8 text-center">
-                <Link to="/jobs" className="text-indigo-600 dark:text-indigo-400 hover:underline">&larr; Back to all jobs</Link>
+                <Link to="/jobs" className="text-orange-500 dark:text-orange-400 hover:underline">&larr; Back to all jobs</Link>
             </div>
         </div>
     );

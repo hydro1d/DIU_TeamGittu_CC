@@ -134,7 +134,34 @@ JWT_SECRET=a-very-secret-and-long-key-for-jwt
 
 ---
 
-## 🧠 Stage 4: Run the Backend Server
+## ✨ Stage 4: Configure the Frontend (API Key)
+
+The AI-powered **Career Roadmap** feature uses the Google Gemini API. To enable it, you need to provide an API key. This step is optional if you don't need the AI roadmap generation.
+
+### 1️⃣ Get Your API Key
+
+1.  Go to **Google AI Studio**: ➡️ [makersuite.google.com](https://makersuite.google.com/)
+2.  Click **"Get API key"** and create a new key.
+
+### 2️⃣ Create a `.env` File for the Frontend
+
+*   In the **root folder** of the project (the same level as `vite.config.ts`), create a new file named `.env`.
+*   This is different from the `.env` file inside the `mysql-backend` folder.
+
+### 3️⃣ Add Your API Key
+
+*   Open the new `.env` file and add the following line, replacing `your_google_api_key_here` with the key you just created.
+
+```env
+# Google Gemini API Key
+API_KEY="your_google_api_key_here"
+```
+
+✅ After saving, the frontend will be able to connect to the Gemini API. You may need to restart the development server if it's already running.
+
+---
+
+## 🧠 Stage 5: Run the Backend Server
 
 ### 1️⃣ Open a Terminal in VS Code
 
@@ -170,7 +197,7 @@ Server running on http://localhost:3001
 
 ---
 
-## 💻 Stage 5: Run the Frontend Application
+## 💻 Stage 6: Run the Frontend Application
 
 ### 1️⃣ Open a New Terminal
 
@@ -231,6 +258,3 @@ Ctrl+Click (Windows) or Cmd+Click (Mac) to open the link.
 ## 📄 License
 
 This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details.
-
----
-.

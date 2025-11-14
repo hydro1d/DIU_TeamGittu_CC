@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getRecommendedJobs, getRecommendedResources } from '../services/apiService';
 import { Job, Resource, Match } from '../types';
-import { Briefcase, BookOpen } from '../components/icons';
+import { Briefcase, BookOpen, Rocket, Download } from '../components/icons';
+import { marked } from 'marked';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { generateCareerRoadmap } from '../services/geminiService';
 
 const RecommendationCard: React.FC<{ match: Match<Job | Resource> }> = ({ match }) => {
     const isJob = 'company' in match.item;
@@ -18,9 +22,9 @@ const RecommendationCard: React.FC<{ match: Match<Job | Resource> }> = ({ match 
                 {isJob ? (match.item as Job).company : (match.item as Resource).platform}
             </p>
             <div className="mt-auto pt-2">
-                <p className="text-xs font-semibold text-green-600 dark:text-green-400">Matches your skills:</p>
+                <p className="text-xs font-semibold text-green-600 dark:text-green-400">Top match for you:</p>
                 <div className="flex flex-wrap gap-1 mt-1">
-                    {match.matchingSkills.map(skill => (
+                    {match.matchingSkills.slice(0, 3).map(skill => (
                         <span key={skill} className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
                             {skill}
                         </span>
@@ -39,6 +43,10 @@ const DashboardPage: React.FC = () => {
   const [recommendedJobs, setRecommendedJobs] = useState<Match<Job>[]>([]);
   const [recommendedResources, setRecommendedResources] = useState<Match<Resource>[]>([]);
   const [loading, setLoading] = useState(true);
+  const [roadmap, setRoadmap] = useState<string | null>(null);
+  const [isGeneratingRoadmap, setIsGeneratingRoadmap] = useState(false);
+  const [roadmapError, setRoadmapError] = useState<string | null>(null);
+  const roadmapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -59,6 +67,65 @@ const DashboardPage: React.FC = () => {
     };
     fetchRecommendations();
   }, [user]);
+
+  const handleGenerateRoadmap = async () => {
+    if (!user || recommendedResources.length === 0) {
+        setRoadmapError("We need your profile and some recommended resources to generate a roadmap.");
+        return;
+    };
+    setIsGeneratingRoadmap(true);
+    setRoadmapError(null);
+    setRoadmap(null);
+
+    try {
+        const fullResources = recommendedResources.map(match => match.item as Resource);
+        const generatedRoadmap = await generateCareerRoadmap(user, fullResources);
+        setRoadmap(generatedRoadmap);
+    } catch (error) {
+        if (error instanceof Error) {
+            setRoadmapError(error.message);
+        } else {
+            setRoadmapError("An unknown error occurred while generating the roadmap.");
+        }
+    } finally {
+        setIsGeneratingRoadmap(false);
+    }
+  };
+
+  const handleDownloadPdf = () => {
+    const input = roadmapRef.current;
+    if (!input) return;
+
+    // Give the browser time to render the content before capturing
+    setTimeout(() => {
+        html2canvas(input, { 
+            scale: 2,
+            useCORS: true,
+            backgroundColor: document.body.classList.contains('dark') ? '#111827' : '#ffffff' 
+        }).then((canvas) => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const imgWidth = canvas.width;
+            const imgHeight = canvas.height;
+            const ratio = imgWidth / imgHeight;
+            const pdfImageHeight = pdfWidth / ratio;
+            let heightLeft = imgHeight * (pdfWidth / imgWidth);
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfImageHeight);
+            heightLeft -= pdf.internal.pageSize.getHeight();
+
+            while (heightLeft > 0) {
+                position -= pdf.internal.pageSize.getHeight();
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfImageHeight);
+                heightLeft -= pdf.internal.pageSize.getHeight();
+            }
+            pdf.save(`Career-Roadmap-${user?.fullName.replace(/\s/g, '-')}.pdf`);
+        });
+    }, 200);
+  };
 
   if (loading) return <div>Loading dashboard...</div>;
   if (!user) return <div>Please log in.</div>;
@@ -115,6 +182,46 @@ const DashboardPage: React.FC = () => {
             </section>
         </div>
       </div>
+
+      <div className="mt-8">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
+                <h2 className="text-2xl font-semibold flex items-center gap-2">
+                    <Rocket className="w-6 h-6 text-indigo-500" /> Your AI-Powered Career Roadmap
+                </h2>
+                {roadmap && !isGeneratingRoadmap && (
+                    <button onClick={handleDownloadPdf} className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                       <Download className="w-4 h-4" /> Download PDF
+                    </button>
+                )}
+            </div>
+
+            {isGeneratingRoadmap && (
+                <div className="text-center p-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-300">Crafting your personal career path with AI...</p>
+                </div>
+            )}
+            {roadmapError && <p className="text-red-500 bg-red-100 dark:bg-red-900 p-3 rounded-md">{roadmapError}</p>}
+
+            {!roadmap && !isGeneratingRoadmap && !roadmapError && (
+                <div className="text-center p-8">
+                    <p className="mb-4 text-gray-600 dark:text-gray-300">Get a step-by-step plan to achieve your career goals, tailored just for you.</p>
+                    <button onClick={handleGenerateRoadmap} className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors font-semibold">
+                        Generate My Roadmap
+                    </button>
+                </div>
+            )}
+            
+            {roadmap && (
+                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-md">
+                    <div ref={roadmapRef} className="prose dark:prose-invert max-w-none p-4" dangerouslySetInnerHTML={{ __html: marked.parse(roadmap) as string }}>
+                    </div>
+                 </div>
+            )}
+        </div>
+      </div>
+
     </div>
   );
 };

@@ -62,3 +62,24 @@ export const DollarSign: React.FC<IconProps> = (props) => (
         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
     </svg>
 );
+
+export const Rocket: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.3.05-3.12-.67-.82-2.32-1.01-3.12-.05z" />
+        <path d="m12 15.5 6-6" />
+        <path d="m13.5 5.5 1-1a3.5 3.5 0 0 0-5 0l-1 1" />
+        <path d="M12 15.5V13a2 2 0 0 1 2-2h1.5" />
+        <path d="M12 12.5a2 2 0 0 0-2-2H8.5" />
+        <path d="M15 12.5a2 2 0 0 1 2-2h1.5" />
+        <path d="M12 15.5a2 2 0 0 0-2-2H8.5" />
+        <path d="m16.5 12.5 6-6" />
+    </svg>
+);
+
+export const Download: React.FC<IconProps> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+);

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { User, ExperienceLevel } from '../types';
+import { extractSkillsFromCV } from '../services/geminiService';
+import { Rocket } from '../components/icons';
 
 const ProfilePage: React.FC = () => {
   const { user, updateUser, loading: authLoading } = useAuth();
@@ -9,6 +11,8 @@ const ProfilePage: React.FC = () => {
   const [skillsInput, setSkillsInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isAnalyzingCv, setIsAnalyzingCv] = useState(false);
+  const [cvAnalysisError, setCvAnalysisError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -47,6 +51,30 @@ const ProfilePage: React.FC = () => {
       } finally {
         setIsSaving(false);
       }
+    }
+  };
+
+  const handleAnalyzeCv = async () => {
+    if (!formData?.cvNotes || !formData.cvNotes.trim()) {
+        setCvAnalysisError("Please paste your CV/Resume text into the text area below before analyzing.");
+        return;
+    }
+    setIsAnalyzingCv(true);
+    setCvAnalysisError(null);
+    try {
+        const extractedSkills = await extractSkillsFromCV(formData.cvNotes);
+        const currentSkills = skillsInput.split(',').map(s => s.trim()).filter(Boolean);
+        // Combine and deduplicate
+        const combinedSkills = [...new Set([...currentSkills, ...extractedSkills])];
+        setSkillsInput(combinedSkills.join(', '));
+    } catch (error) {
+        if (error instanceof Error) {
+            setCvAnalysisError(error.message);
+        } else {
+            setCvAnalysisError("An unknown error occurred during CV analysis.");
+        }
+    } finally {
+        setIsAnalyzingCv(false);
     }
   };
 
@@ -106,8 +134,25 @@ const ProfilePage: React.FC = () => {
         </div>
 
         <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">CV Text / Notes</label>
-            <textarea name="cvNotes" value={formData.cvNotes} onChange={handleInputChange} disabled={!isEditing} rows={6} className="mt-1 block w-full p-2 border rounded-md shadow-sm disabled:bg-gray-200 dark:disabled:bg-gray-700 dark:bg-gray-900 dark:border-gray-600"/>
+            <div className="flex justify-between items-center mb-1">
+                 <label htmlFor="cvNotes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    CV / Resume Text
+                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">(Paste here to auto-fill skills)</span>
+                </label>
+                {isEditing && (
+                    <button
+                        type="button"
+                        onClick={handleAnalyzeCv}
+                        disabled={isAnalyzingCv}
+                        className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Rocket className="w-4 h-4" />
+                        {isAnalyzingCv ? 'Analyzing...' : 'Analyze & Fill Skills'}
+                    </button>
+                )}
+            </div>
+            <textarea id="cvNotes" name="cvNotes" value={formData.cvNotes} onChange={handleInputChange} disabled={!isEditing} rows={6} className="block w-full p-2 border rounded-md shadow-sm disabled:bg-gray-200 dark:disabled:bg-gray-700 dark:bg-gray-900 dark:border-gray-600"/>
+            {cvAnalysisError && <p className="text-sm text-red-500 mt-1">{cvAnalysisError}</p>}
         </div>
 
         {isEditing && (

@@ -252,12 +252,44 @@ app.get('/recommendations/resources', authenticateToken, async (req, res) => {
         if (rows.length === 0) return res.status(404).json({ message: 'User not found.' });
         
         const user = formatUserForClient(rows[0]);
-        const recommended = getRecommendations(user, RESOURCES, 'relatedSkills');
-        res.json(recommended);
+        
+        // Logic based ONLY on career interests and career track.
+        const userInterestKeywords = [
+            ...(user.careerInterests || '').toLowerCase().split(/[\s,]+/),
+            ...(user.careerTrack || '').toLowerCase().split(/[\s,]+/)
+        ].filter(word => word.length > 2 && !['and', 'for', 'the', 'dev', 'data', 'web', 'engineer', 'developer', 'specialist'].includes(word));
+        
+        const userInterestsSet = new Set(userInterestKeywords.filter(Boolean));
+
+        if (userInterestsSet.size === 0) {
+            return res.json([]);
+        }
+
+        const recommendations = [];
+        RESOURCES.forEach(resource => {
+            const resourceText = (resource.title + ' ' + resource.relatedSkills.join(' ')).toLowerCase();
+            
+            const matchingInterests = [...userInterestsSet].filter(interest => resourceText.includes(interest));
+            
+            if (matchingInterests.length > 0) {
+                const uniqueMatchingInterests = [...new Set(matchingInterests)];
+                recommendations.push({ 
+                    item: resource, 
+                    reason: `Matches your interests: ${uniqueMatchingInterests.join(', ')}`, 
+                    matchingSkills: uniqueMatchingInterests // field name must be matchingSkills for frontend
+                });
+            }
+        });
+
+        recommendations.sort((a, b) => b.matchingSkills.length - a.matchingSkills.length);
+        res.json(recommendations);
+
     } catch (error) {
+        console.error('Resource recommendation error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
+
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
